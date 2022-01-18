@@ -9,8 +9,8 @@ const saltRounds = 10;
 router.post('/register', async (req, res) => {
     const {email, name, password} = req.body;
     const hash = bcrypt.hashSync(password, saltRounds);  
-    await myQueryUser1("INSERT INTO Users (Email, Nombre, Contrasena) VALUES (?, ?, ?)", email, name, hash);
-    const [user] = await myQueryUser1("SELECT * FROM Users WHERE Email = ?", email);
+    await myQueryUser1("INSERT INTO users (Email, Nombre, Contrasena) VALUES (?, ?, ?)", email, name, hash);
+    const [user] = await myQueryUser1("SELECT * FROM users WHERE Email = ?", email);
     const token = signToken(user); 
     res.json({
         token,
@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const {email, password} = req.body;
-    const user = await myQueryUser2("SELECT * FROM Users WHERE Email = ?", email);
+    const user = await myQueryUser2("SELECT * FROM users WHERE Email = ?", email);
     if(user.length === 0) {
         res.status(401).json({error: "Username doesn't exist"});
     } else if (bcrypt.compareSync(password, user[0].Contrasena)) {
