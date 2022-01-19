@@ -18,9 +18,7 @@ app.use(express.json());
 app.use(cors()); 
 
 //routes
-app.use('/', async (req, res) => {
-    res.json({Message: "Successfully connected"}); 
-});
+app.use('/', require('./routes')); 
 app.use('/api/users',require('./routes/users'));
 app.use('/api/books',require('./routes/books')); 
 
