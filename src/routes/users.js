@@ -1,49 +1,62 @@
 
-const {myQueryUser1, myQueryUser2} = require('../../config/dbConnection');
-const {Router} = require('express');
+const { registerUser, getUser } = require('../../config/dbConnection');
+const { Router } = require('express');
 const signToken = require('../../config/auth');
 const router = Router();
 const bcrypt = require('bcrypt');
-const saltRounds = 10; 
+const saltRounds = 10;
 
 router.post('/register', async (req, res) => {
-    const {email, name, password} = req.body;
-    const hash = bcrypt.hashSync(password, saltRounds);  
-    await myQueryUser1("INSERT INTO users (Email, Nombre, Contrasena) VALUES (?, ?, ?)", email, name, hash);
-    const [user] = await myQueryUser1("SELECT * FROM users WHERE Email = ?", email);
-    const token = signToken(user); 
-    res.json({
-        token,
-        name: user.Nombre,
-        email: user.Email 
-    });      
+    try {
+        const { email, name, password } = req.body;
+        const hash = bcrypt.hashSync(password, saltRounds);
+        const response = await registerUser(email, name, hash);
+        if (response.name === 'Error') {
+            res.status(400).json({ message: response.message }).end()
+        } else {
+            const [user] = await getUser(email);
+            const token = signToken(user);
+            res.json({
+                token,
+                name: user.Nombre,
+                email: user.Email
+            }).end()
+        }
+    } catch (error) {
+        res.status(400).json({ error: "Bad request or incomplete" })
+    }
 });
 
 router.post('/login', async (req, res) => {
-    const {email, password} = req.body;
-    const user = await myQueryUser2("SELECT * FROM users WHERE Email = ?", email);
-    if(user.length === 0) {
-        res.status(401).json({error: "Username doesn't exist"});
-    } else if (bcrypt.compareSync(password, user[0].Contrasena)) {
-        const [user2] = user; 
-        const token = signToken(user2); 
-        res.json({
-            token,
-            name: user2.Nombre,
-            email: user2.Email 
-        }); 
-    } else  {
-        res.status(401).json({error: "Invalid password"});
+    try {
+        const { email, password } = req.body;
+        //Con la función getUser se obteniene un arreglo con un objeto o vacío  
+        const user = await getUser(email);
+        if (user.length === 0) {
+            res.status(401).json({ error: "Username doesn't exist" }).end()
+        } else if (bcrypt.compareSync(password, user[0].Contrasena)) {
+            const [user2] = user;
+            const token = signToken(user2);
+            res.json({
+                token,
+                name: user2.Nombre,
+                email: user2.Email
+            }).end()
+        } else {
+            res.status(401).json({ error: "Invalid password" }).end()
+        }
+    } catch (error) {
+        res.status(400).json({ error: "Bad request or incomplete" })
     }
 });
 
 router.put('/:id', (req, res) => {
-    const {id} = req.params; 
+    const { id } = req.params;
 });
 
 router.delete('/:id', (req, res) => {
     console.log(req.params);
-    res.send('eliminado');  
+    res.send('eliminado');
 });
 
 module.exports = router;

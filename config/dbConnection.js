@@ -1,87 +1,62 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
 const dotenv = require('dotenv');
 dotenv.config(); 
 
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD, 
-    port: process.env.DB_PORT, 
-    database: process.env.DB_DATABASE
-});
-
-connection.connect((error, result) => {
-    if(error) {
-        console.log('Error en la conexión');
-    }
-    console.log('Conectada a la BD...'); 
-});
-
-const myQueryUser1 = (query, param1, param2, param3) => {
-    return new Promise( (resolve, reject) => {
-        
-        try {
-            connection.query(query, [param1, param2, param3], (error, result) => {
-                if(error) {
-                    console.log('Error en ejecutar la query');
-                    reject(error); 
-                }
-                
-                resolve(result); 
-            }); 
-        } catch (error) {
-            reject(error); 
-        }
-    }); 
+const connect = () => {
+    const connection = mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD, 
+        port: process.env.DB_PORT, 
+        database: process.env.DB_DATABASE
+    });
+    //Esta función retorna una promesa
+    return connection; 
 }
 
-const myQueryUser2 = (query, param) => {
-    return new Promise( (resolve, reject) => {
-        try {
-            connection.query(query, [param], (error, result) => {
-                if(error) {
-                    console.log('Error en ejecutar la query');
-                    reject(error);
-                }
-                resolve(result); 
-            }); 
-        } catch (error) {
-            reject(error); 
-        }
-    }); 
+const registerUser = async (email, name, hash) => {
+    return connect()
+    .then((conn) => {
+        let result = conn.execute("INSERT INTO users (Email, Nombre, Contrasena) VALUES (?, ?, ?)", [email, name, hash])
+        conn.end()
+        return result 
+    })
+    .then(([rows, field]) => rows)
+    .catch(error => error)
 }
 
-const myQueryBook1 = (query) => {
-    return new Promise( (resolve, reject) => {
-        try {
-            connection.query(query, (error, result) => {
-                if(error) {
-                    console.log('Error en ejecutar la query');
-                    reject(error);
-                }
-                resolve(result); 
-            }); 
-        } catch (error) {
-            reject(error); 
-        }
-    }); 
+const getUser = async (email) => {
+    return connect()
+    .then(conn => {
+        let result = conn.execute("SELECT * FROM users WHERE Email = ?", [email])
+        conn.end()
+        return result 
+    })
+    .then(([rows, field]) => rows)
+    .catch(error => error) 
 }
 
-const myQueryBook2 = (query, param1, param2, param3, param4) => {
-    return new Promise( (resolve, reject) => {
-        try {
-            connection.query(query, [param1, param2, param3, param4], (error, result) => {
-                if(error) {
-                    console.log('Error en ejecutar la query');
-                    reject(error);
-                }
-                resolve(result); 
-            }); 
-        } catch (error) {
-            reject(error); 
-        }
-    }); 
+const getBooks = async () => {
+    return connect()
+    .then((conn) => {
+        let result = conn.execute("SELECT * FROM books")
+        conn.end()
+        return result 
+    })
+    .then(([rows, field]) => rows)
+    .catch(error => error)   
 }
 
-module.exports = {myQueryUser1, myQueryUser2, myQueryBook1, myQueryBook2};   
+const registerBook = async (title, author, lastName, year) => {
+    return connect()
+    .then((conn) => {
+        let result = conn.execute("INSERT INTO books (TituloLibro, NombreAutor, ApellidosAutor, Anio) VALUES (?, ?, ?, ?)", [title, author, lastName, year])
+        conn.end()
+        return result
+    })
+    .then(([rows, fields]) => rows)
+    .catch(error => error) 
+}
+
+module.exports = { registerUser, getUser, getBooks, registerBook};   
