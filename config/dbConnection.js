@@ -24,6 +24,7 @@ const registerUser = async (email, name, hash) => {
     })
     .then(([rows, field]) => rows)
     .catch(error => error)
+    //Esta función retorna el resultado de una promesa
 }
 
 const getUser = async (email) => {
@@ -35,6 +36,7 @@ const getUser = async (email) => {
     })
     .then(([rows, field]) => rows)
     .catch(error => error) 
+    //Esta función retorna el resultado de una promesa
 }
 
 const getBooks = async () => {
@@ -45,7 +47,8 @@ const getBooks = async () => {
         return result 
     })
     .then(([rows, field]) => rows)
-    .catch(error => error)   
+    .catch(error => error)
+    //Esta función retorna el resultado de una promesa   
 }
 
 const registerBook = async (title, author, lastName, year) => {
@@ -56,7 +59,8 @@ const registerBook = async (title, author, lastName, year) => {
         return result
     })
     .then(([rows, fields]) => rows)
-    .catch(error => error) 
+    .catch(error => error)
+    //Esta función retorna el resultado de una promesa 
 }
 
 module.exports = { registerUser, getUser, getBooks, registerBook};   

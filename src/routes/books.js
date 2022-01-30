@@ -11,15 +11,19 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { title, author, lastName, year } = req.body;
+        //La función registerBook indica el resultado de insertar los datos en el BD
         const response = await registerBook(title, author, lastName, year)
-        console.log(response.name)
-        if (response.name === 'Error' || 'TypeError') {
-            res.status(400).json({ message: response.message }).end()
-        } else {
+        console.log(response)
+        if (response.affectedRows) {
+            //Enviar que la información se guardó adecuadamente
             res.json({ Message: "Saved information" }).end();
+        } else if (response.name === 'Error' || response.name === 'TypeError') { 
+            //Enviar que la información no se guardó por un error en la BD
+            res.status(400).json({ Message: response.message }).end()
         }
     } catch (error) {
-        res.status(400).json({ error: "Bad request or incomplete" })
+        //Enviar un error que la información no se guardó porque se enviaron los datos incompletos 
+        res.status(400).json({Message: error.message})
     }
 });
 
