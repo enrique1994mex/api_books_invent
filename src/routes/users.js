@@ -24,11 +24,11 @@ router.post('/register', async (req, res) => {
             }).end()
         } else if (response.name === 'Error') {
             //Si no se guardaron los datos se envía el error 
-            res.status(400).json({ message: "The email already exists" }).end()
+            res.status(400).json({error: "The email already exists" }).end()
         }
     } catch (error) {
         //Enviar un error que la información no se guardó porque se enviaron los datos incompletos 
-        res.status(400).json({ message: "Bad request or incomplete" })
+        res.status(400).json({ error: "Bad request or incomplete" })
     }
 });
 

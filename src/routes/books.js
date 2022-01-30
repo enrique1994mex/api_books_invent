@@ -19,11 +19,11 @@ router.post('/', async (req, res) => {
             res.json({ Message: "Saved information" }).end();
         } else if (response.name === 'Error' || response.name === 'TypeError') { 
             //Enviar que la información no se guardó por un error en la BD
-            res.status(400).json({ Message: response.message }).end()
+            res.status(400).json({ error: response.message }).end()
         }
     } catch (error) {
         //Enviar un error que la información no se guardó porque se enviaron los datos incompletos 
-        res.status(400).json({Message: error.message})
+        res.status(400).json({error: error.message})
     }
 });
 
